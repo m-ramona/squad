@@ -17,6 +17,8 @@ import util
 from args import get_train_args
 from collections import OrderedDict
 from json import dumps
+
+from attentive_reader import AttentiveReaderModel
 from models import BiDAF
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
@@ -46,7 +48,10 @@ def main(args):
 
     # Get model
     log.info('Building model...')
-    model = BiDAF(word_vectors=word_vectors,
+    # model = BiDAF(word_vectors=word_vectors,
+    #               hidden_size=args.hidden_size,
+    #               drop_prob=args.drop_prob)
+    model = AttentiveReaderModel(word_vectors=word_vectors,
                   hidden_size=args.hidden_size,
                   drop_prob=args.drop_prob)
     model = nn.DataParallel(model, args.gpu_ids)
