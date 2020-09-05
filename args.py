@@ -90,7 +90,7 @@ def get_setup_args():
     return args
 
 
-def get_train_args():
+def get_train_args(args_to_parse=None):
     """Get arguments needed in train.py."""
     parser = argparse.ArgumentParser('Train a model on SQuAD')
 
@@ -139,7 +139,7 @@ def get_train_args():
                         default=0.999,
                         help='Decay rate for exponential moving average of parameters.')
 
-    args = parser.parse_args()
+    args = parser.parse_args(args_to_parse)
 
     if args.metric_name == 'NLL':
         # Best checkpoint is the one that minimizes negative log-likelihood
