@@ -6,10 +6,15 @@ Author:
 
 import argparse
 
-
 TINY = True
-DATA_DIR = 'data_tiny' if TINY else 'data'
+DATA_DIR = None
 
+def set_tiny(new_tiny):
+    global TINY, DATA_DIR
+    TINY = new_tiny
+    DATA_DIR = 'data_tiny' if TINY else 'data'
+
+set_tiny(True)
 
 def get_setup_args():
     """Get arguments needed in setup.py."""
