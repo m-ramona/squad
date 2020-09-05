@@ -78,7 +78,7 @@ class RNNLayer(nn.Module):
 
 class AttentiveReaderModel(nn.Module):
 
-    def __init__(self, word_vectors, hidden_size, drop_prob=0.):
+    def __init__(self, word_vectors, hidden_size, drop_prob=0., use_gru=True):
         super(AttentiveReaderModel, self).__init__()
         self.vocab, self.input_size = word_vectors.size()
         self.hidden_size = hidden_size
