@@ -10,6 +10,7 @@ Pre-processing code adapted from:
 Author:
     Chris Chute (chute@stanford.edu)
 """
+import random
 
 import numpy as np
 import os
@@ -17,7 +18,7 @@ import spacy
 import ujson as json
 import urllib.request
 
-from args import get_setup_args
+from args import get_setup_args, TINY, DATA_DIR
 from codecs import open
 from collections import Counter
 from subprocess import run
@@ -45,7 +46,7 @@ def download_url(url, output_path, show_progress=True):
 
 
 def url_to_data_path(url):
-    return os.path.join('./data/', url.split('/')[-1])
+    return os.path.join(f'./{DATA_DIR}/', url.split('/')[-1])
 
 
 def download(args):
@@ -56,12 +57,13 @@ def download(args):
 
     for name, url in downloads:
         output_path = url_to_data_path(url)
-        if not os.path.exists(output_path):
+        extracted_path = output_path.replace('.zip', '')
+
+        if not os.path.exists(extracted_path):
             print(f'Downloading {name}...')
             download_url(url, output_path)
 
         if os.path.exists(output_path) and output_path.endswith('.zip'):
-            extracted_path = output_path.replace('.zip', '')
             if not os.path.exists(extracted_path):
                 print(f'Unzipping {name}...')
                 with ZipFile(output_path, 'r') as zip_fh:
@@ -88,7 +90,7 @@ def convert_idx(text, tokens):
     return spans
 
 
-def process_file(filename, data_type, word_counter, char_counter):
+def process_file(filename, data_type, word_counter, char_counter, max_examples=None):
     print(f"Pre-processing {data_type} examples...")
     examples = []
     eval_examples = {}
@@ -144,6 +146,10 @@ def process_file(filename, data_type, word_counter, char_counter):
                                                  "answers": answer_texts,
                                                  "uuid": qa["id"]}
         print(f"{len(examples)} questions in total")
+    if max_examples is not None:
+        keep_idxs = random.sample(list(range(total)), max_examples)
+        examples = [examples[idx] for idx in keep_idxs]
+        eval_examples = {str(new_idx+1): eval_examples[str(old_idx+1)] for new_idx, old_idx in enumerate(keep_idxs)}
     return examples, eval_examples
 
 
@@ -349,18 +355,19 @@ def save(filename, obj, message=None):
 def pre_process(args):
     # Process training set and use it to decide on the word/character vocabularies
     word_counter, char_counter = Counter(), Counter()
-    train_examples, train_eval = process_file(args.train_file, "train", word_counter, char_counter)
+    max_examples = 10 if TINY else None
+    train_examples, train_eval = process_file(args.train_file, "train", word_counter, char_counter, max_examples)
     word_emb_mat, word2idx_dict = get_embedding(
         word_counter, 'word', emb_file=args.glove_file, vec_size=args.glove_dim, num_vectors=args.glove_num_vecs)
     char_emb_mat, char2idx_dict = get_embedding(
         char_counter, 'char', emb_file=None, vec_size=args.char_dim)
 
     # Process dev and test sets
-    dev_examples, dev_eval = process_file(args.dev_file, "dev", word_counter, char_counter)
+    dev_examples, dev_eval = process_file(args.dev_file, "dev", word_counter, char_counter, max_examples)
     build_features(args, train_examples, "train", args.train_record_file, word2idx_dict, char2idx_dict)
     dev_meta = build_features(args, dev_examples, "dev", args.dev_record_file, word2idx_dict, char2idx_dict)
     if args.include_test_examples:
-        test_examples, test_eval = process_file(args.test_file, "test", word_counter, char_counter)
+        test_examples, test_eval = process_file(args.test_file, "test", word_counter, char_counter, max_examples)
         save(args.test_eval_file, test_eval, message="test eval")
         test_meta = build_features(args, test_examples, "test",
                                    args.test_record_file, word2idx_dict, char2idx_dict, is_test=True)

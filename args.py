@@ -7,6 +7,10 @@ Author:
 import argparse
 
 
+TINY = True
+DATA_DIR = 'data_tiny' if TINY else 'data'
+
+
 def get_setup_args():
     """Get arguments needed in setup.py."""
     parser = argparse.ArgumentParser('Download and pre-process SQuAD')
@@ -27,19 +31,19 @@ def get_setup_args():
                         default='http://nlp.stanford.edu/data/glove.840B.300d.zip')
     parser.add_argument('--dev_meta_file',
                         type=str,
-                        default='./data/dev_meta.json')
+                        default=f'./{DATA_DIR}/dev_meta.json')
     parser.add_argument('--test_meta_file',
                         type=str,
-                        default='./data/test_meta.json')
+                        default=f'./{DATA_DIR}/test_meta.json')
     parser.add_argument('--word2idx_file',
                         type=str,
-                        default='./data/word2idx.json')
+                        default=f'./{DATA_DIR}/word2idx.json')
     parser.add_argument('--char2idx_file',
                         type=str,
-                        default='./data/char2idx.json')
+                        default=f'./{DATA_DIR}/char2idx.json')
     parser.add_argument('--answer_file',
                         type=str,
-                        default='./data/answer.json')
+                        default=f'./{DATA_DIR}/answer.json')
     parser.add_argument('--para_limit',
                         type=int,
                         default=400,
@@ -178,28 +182,28 @@ def add_common_args(parser):
     """Add arguments common to all 3 scripts: setup.py, train.py, test.py"""
     parser.add_argument('--train_record_file',
                         type=str,
-                        default='./data/train.npz')
+                        default=f'./{DATA_DIR}/train.npz')
     parser.add_argument('--dev_record_file',
                         type=str,
-                        default='./data/dev.npz')
+                        default=f'./{DATA_DIR}/dev.npz')
     parser.add_argument('--test_record_file',
                         type=str,
-                        default='./data/test.npz')
+                        default=f'./{DATA_DIR}/test.npz')
     parser.add_argument('--word_emb_file',
                         type=str,
-                        default='./data/word_emb.json')
+                        default=f'./{DATA_DIR}/word_emb.json')
     parser.add_argument('--char_emb_file',
                         type=str,
-                        default='./data/char_emb.json')
+                        default=f'./{DATA_DIR}/char_emb.json')
     parser.add_argument('--train_eval_file',
                         type=str,
-                        default='./data/train_eval.json')
+                        default=f'./{DATA_DIR}/train_eval.json')
     parser.add_argument('--dev_eval_file',
                         type=str,
-                        default='./data/dev_eval.json')
+                        default=f'./{DATA_DIR}/dev_eval.json')
     parser.add_argument('--test_eval_file',
                         type=str,
-                        default='./data/test_eval.json')
+                        default=f'./{DATA_DIR}/test_eval.json')
 
 
 def add_train_test_args(parser):
