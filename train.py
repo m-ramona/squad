@@ -80,17 +80,21 @@ def main(args):
     # Get data loader
     log.info('Building dataset...')
     train_dataset = SQuAD(args.train_record_file, args.use_squad_v2)
+    log.info('  Loaded raw SQuAD train dataset...')
     train_loader = data.DataLoader(train_dataset,
                                    batch_size=args.batch_size,
                                    shuffle=True,
                                    num_workers=args.num_workers,
                                    collate_fn=collate_fn)
+    log.info('  Built train data loader...')
     dev_dataset = SQuAD(args.dev_record_file, args.use_squad_v2)
+    log.info('  Loaded raw SQuAD dev dataset...')
     dev_loader = data.DataLoader(dev_dataset,
                                  batch_size=args.batch_size,
                                  shuffle=False,
                                  num_workers=args.num_workers,
                                  collate_fn=collate_fn)
+    log.info('  Built dev data loader...')
 
     # Train
     log.info('Training...')
