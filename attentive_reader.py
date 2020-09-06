@@ -17,7 +17,7 @@ class AttentionLayer(nn.Module):
         # q_t (batch_size, h, 1)
         p_i = self.att_proj(p_i)                # (batch_size, c_len, h)
         a_i = torch.bmm(p_i, q_t).squeeze(-1)   # (batch_size, c_len, 1)
-        a_i = F.dropout(a_i, self.drop_prob, self.training)
+#        a_i = F.dropout(a_i, self.drop_prob, self.training)
 
         return a_i # logits
 
@@ -67,7 +67,6 @@ class RNNLayer(nn.Module):
 
         if self.end_of_seq:
             out = h_n.permute(1, 0, 2).contiguous().view((-1, self.hidden_size*2)).unsqueeze(-2)
-            out = F.dropout(out, self.drop_prob, self.training)
             out = out[unsort_idx]
             # out (batch_size, 1, 2*self.hidden_size)
         else:
