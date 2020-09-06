@@ -44,6 +44,7 @@ class RNNLayer(nn.Module):
         self.hidden_size = hidden_size
         self.drop_prob = drop_prob
         self.use_gru = use_gru
+        self.num_layers = num_layers
         rnn_init = nn.GRU if use_gru else nn.LSTM
         self.rnn = rnn_init(input_size, hidden_size, num_layers,
                           dropout=drop_prob if num_layers > 1 else 0,
@@ -64,6 +65,11 @@ class RNNLayer(nn.Module):
         else:
             output, (h_n, c_n) = self.rnn(x)
         # h_n (num_layers*2, batch, self.hidden_size)
+        h_n = h_n.view(self.num_layers, 2, -1, self.hidden_size)
+        # h_n (num_layers, 2, batch, self.hidden_size)
+        # picking the upper layer
+        h_n = h_n[-1, :, :, :].squeeze(0)
+        # h_n (2, batch, self.hidden_size)
 
         if self.end_of_seq:
             out = h_n.permute(1, 0, 2).contiguous().view((-1, self.hidden_size*2)).unsqueeze(-2)
