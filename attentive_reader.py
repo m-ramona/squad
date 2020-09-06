@@ -77,9 +77,9 @@ class RNNLayer(nn.Module):
             # out (batch_size, 1, 2*self.hidden_size)
         else:
             out, _ = pad_packed_sequence(output, batch_first=True, total_length=padded_len)
+            out = F.dropout(out, self.drop_prob, self.training)
             out = out[unsort_idx]
             # out (batch_size, c_len, 2*self.hidden_size)
-        out = F.dropout(out, self.drop_prob, self.training)
 
         return out
 
