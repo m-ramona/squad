@@ -122,6 +122,10 @@ def get_train_args(args_to_parse=None):
                         type=float,
                         default=0.2,
                         help='Probability of zeroing an activation in dropout layers.')
+    parser.add_argument('--use_gru',
+                        type=bool,
+                        default=True,
+                        help='True to use GRU / False to use LSTM.')
     parser.add_argument('--metric_name',
                         type=str,
                         default='F1',

@@ -54,7 +54,7 @@ def main(args):
     model = AttentiveReaderModel(word_vectors=word_vectors,
                   hidden_size=args.hidden_size,
                   drop_prob=args.drop_prob,
-                  use_gru=False)
+                  use_gru=args.use_gru)
     model = nn.DataParallel(model, args.gpu_ids)
     if args.load_path:
         log.info(f'Loading checkpoint from {args.load_path}...')
