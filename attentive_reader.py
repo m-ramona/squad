@@ -7,15 +7,17 @@ import torch.nn.functional as F
 
 class AttentionLayer(nn.Module):
 
-    def __init__(self, hidden_size):
+    def __init__(self, hidden_size, drop_prob=0.):
         super(AttentionLayer, self).__init__()
         self.hidden_size = hidden_size
+        self.drop_prob = drop_prob
         self.att_proj = nn.Linear(hidden_size, hidden_size, bias=False)
 
     def forward(self, p_i, q_t):
         # q_t (batch_size, h, 1)
         p_i = self.att_proj(p_i)                # (batch_size, c_len, h)
         a_i = torch.bmm(p_i, q_t).squeeze(-1)   # (batch_size, c_len, 1)
+        a_i = F.dropout(a_i, self.drop_prob, self.training)
 
         return a_i # logits
 
@@ -65,6 +67,7 @@ class RNNLayer(nn.Module):
 
         if self.end_of_seq:
             out = h_n.permute(1, 0, 2).contiguous().view((-1, self.hidden_size*2)).unsqueeze(-2)
+            out = F.dropout(out, self.drop_prob, self.training)
             out = out[unsort_idx]
             # out (batch_size, 1, 2*self.hidden_size)
         else:
@@ -83,16 +86,18 @@ class AttentiveReaderModel(nn.Module):
         self.vocab, self.input_size = word_vectors.size()
         self.hidden_size = hidden_size
         self.h = 2 * hidden_size
-        self.rnn_drop = drop_prob
+        self.drop_prob = drop_prob
         self.embed = nn.Embedding.from_pretrained(word_vectors)
         self.passage_rnn = RNNLayer(self.input_size, self.hidden_size, 1,
-                                    drop_prob=self.rnn_drop,
-                                    end_of_seq=False)
+                                    drop_prob=drop_prob,
+                                    end_of_seq=False,
+                                    use_gru=use_gru)
         self.query_rnn = RNNLayer(self.input_size, self.hidden_size, 1,
-                                  drop_prob=self.rnn_drop,
-                                  end_of_seq=True)
-        self.att_start = AttentionLayer(self.h)
-        self.att_end = AttentionLayer(self.h)
+                                  drop_prob=drop_prob,
+                                  end_of_seq=True,
+                                  use_gru=use_gru)
+        self.att_start = AttentionLayer(self.h, drop_prob=drop_prob)
+        self.att_end = AttentionLayer(self.h, drop_prob=drop_prob)
         self.output = AttentiveReaderOutput(self.h)
 
     def forward(self, cw_idxs, qw_idxs):
