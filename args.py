@@ -122,6 +122,10 @@ def get_train_args(args_to_parse=None):
                         type=float,
                         default=0.2,
                         help='Probability of zeroing an activation in dropout layers.')
+    parser.add_argument('--rnn_layers',
+                        type=int,
+                        default=1,
+                        help='Number of layers in the bidirectional RNNs.')
     parser.add_argument('--use_gru',
                         type=bool,
                         default=True,

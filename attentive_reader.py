@@ -81,18 +81,18 @@ class RNNLayer(nn.Module):
 
 class AttentiveReaderModel(nn.Module):
 
-    def __init__(self, word_vectors, hidden_size, drop_prob=0., use_gru=True):
+    def __init__(self, word_vectors, hidden_size, drop_prob=0., use_gru=True, rnn_layers=1):
         super(AttentiveReaderModel, self).__init__()
         self.vocab, self.input_size = word_vectors.size()
         self.hidden_size = hidden_size
         self.h = 2 * hidden_size
         self.drop_prob = drop_prob
         self.embed = nn.Embedding.from_pretrained(word_vectors)
-        self.passage_rnn = RNNLayer(self.input_size, self.hidden_size, 1,
+        self.passage_rnn = RNNLayer(self.input_size, self.hidden_size, rnn_layers,
                                     drop_prob=drop_prob,
                                     end_of_seq=False,
                                     use_gru=use_gru)
-        self.query_rnn = RNNLayer(self.input_size, self.hidden_size, 1,
+        self.query_rnn = RNNLayer(self.input_size, self.hidden_size, rnn_layers,
                                   drop_prob=drop_prob,
                                   end_of_seq=True,
                                   use_gru=use_gru)
