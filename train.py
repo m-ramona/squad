@@ -20,6 +20,7 @@ from json import dumps
 
 from attentive_reader import AttentiveReaderModel
 from bidaf import BiDAF
+from models import BiDAF as BiDAFStanford
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 from ujson import load as json_load
@@ -62,6 +63,10 @@ def main(args):
                       hidden_size=args.hidden_size,
                       drop_prob=args.drop_prob,
                       use_gru=args.use_gru)
+    elif args.model == 'bidaf_stanford':
+        model = BiDAFStanford(word_vectors=word_vectors,
+                              hidden_size=args.hidden_size,
+                              drop_prob=args.drop_prob)
     model = nn.DataParallel(model, args.gpu_ids)
     if args.load_path:
         log.info(f'Loading checkpoint from {args.load_path}...')

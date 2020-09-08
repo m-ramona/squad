@@ -11,7 +11,8 @@ DATA_DIR = 'data'
 
 MODEL_TYPES = [
     'attentive_reader',
-    'bidaf'
+    'bidaf',
+    'bidaf_stanford'
 ]
 
 def set_tiny(new_tiny):
