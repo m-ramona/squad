@@ -130,6 +130,10 @@ def get_train_args(args_to_parse=None):
                         type=int,
                         default=1,
                         help='Number of layers in the bidirectional RNNs.')
+    parser.add_argument('--use_gru',
+                        type=bool,
+                        default=True,
+                        help='True to use GRU / False to use LSTM.')
     parser.add_argument('--model',
                         type=str,
                         default=MODEL_TYPES[0],
