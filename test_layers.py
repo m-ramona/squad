@@ -11,7 +11,7 @@ batch = 3
 clen = 6
 qlen = 5
 input_size = 2
-hidden_size = 5
+hidden_size = 3
 emb_size = 4
 vocab = 13
 

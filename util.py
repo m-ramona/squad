@@ -386,6 +386,14 @@ def masked_softmax(logits, mask, dim=-1, log_softmax=False):
     return probs
 
 
+def masked_max(t, mask, dim=-1):
+    mask = mask.type(torch.float32)
+    masked_t = mask * t + (1 - mask) * -1e30
+    out = torch.max(masked_t, dim=dim)[0]
+
+    return out
+
+
 def visualize(tbx, pred_dict, eval_path, step, split, num_visuals):
     """Visualize text examples to TensorBoard.
 

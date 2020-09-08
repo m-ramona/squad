@@ -3,7 +3,7 @@ from torch import nn as nn
 from torch.nn import functional as F
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
-from util import masked_softmax
+from util import masked_softmax, masked_max
 
 
 class AttentionLayer(nn.Module):
@@ -79,8 +79,8 @@ class AttentionFlowLayer(nn.Module):
         self.sim_proj = nn.Linear(3 * input_size, 1, bias=False)
 
     def similarity_matrix(self, h, u):
-        # h (batch, h_len, hidden_size)
-        # u (batch, u_len, hidden_size)
+        # h (batch, h_len, input_size)
+        # u (batch, u_len, input_size)
         h_dot_u = torch.mul(h.unsqueeze(2), u.unsqueeze(1)) # (batch, h_len, u_len, input_size)
         h_len, u_len = h.size(1), u.size(1)
         h_mat = h.unsqueeze(2).repeat(1, 1, u_len, 1)       # (batch, h_len, u_len, input_size)
@@ -97,11 +97,12 @@ class AttentionFlowLayer(nn.Module):
         h_len, u_len = h.size(1), u.size(1)
 
         # Context-to-query Attention
-        a_t = masked_softmax(S, u_mask.view(-1, 1, u_len), dim=2)               # (batch, h_len, u_len)
+        u_mask = u_mask.view(-1, 1, u_len)
+        a_t = masked_softmax(S, u_mask, dim=2)               # (batch, h_len, u_len)
         U_tilde = torch.bmm(a_t, u)                 # (batch, h_len, input_size)
 
         # Query-to-context Attention
-        b = masked_softmax(torch.max(S, dim=2)[0], h_mask, dim=1) # (batch, h_len)
+        b = masked_softmax(masked_max(S, u_mask, dim=2), h_mask, dim=1) # (batch, h_len)
         b = b.unsqueeze(dim=1)                      # (batch, 1, h_len)
         H_tilde = torch.bmm(b, h)                   # (batch, 1, input_size)
         H_tilde = H_tilde.repeat(1, h_len, 1)       # (batch, h_len, input_size)
@@ -138,16 +139,14 @@ class BiDAFOutputLayer(nn.Module):
 
         p1_input = torch.cat((g, m), dim=-1)        # (batch, h_len, 10*hidden_size)
         p1 = self.p1_proj(p1_input).squeeze(-1)     # (batch, h_len)
-        p1 = torch.softmax(p1, dim=-1)
 
         m2 = self.rnn_p2(m, lengths)
 
         p2_input = torch.cat((g, m2), dim=-1)        # (batch, h_len, 10*hidden_size)
         p2 = self.p2_proj(p2_input).squeeze(-1)      # (batch, h_len)
-        p2 = torch.softmax(p2, dim=-1)
 
-        p1 = masked_softmax(p1, masks, log_softmax=True)
-        p2 = masked_softmax(p2, masks, log_softmax=True)
+        log_p1 = masked_softmax(p1, masks, log_softmax=True)
+        log_p2 = masked_softmax(p2, masks, log_softmax=True)
 
-        return p1, p2
+        return log_p1, log_p2
 

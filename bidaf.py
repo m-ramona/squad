@@ -29,7 +29,8 @@ class BiDAF(nn.Module):
                                   end_of_seq=False,
                                   use_gru=use_gru)
 
-        self.flow = AttentionFlowLayer(2*self.hidden_size, drop_prob=drop_prob)
+        self.flow = AttentionFlowLayer(2*self.hidden_size,
+                                       drop_prob=drop_prob)
 
         self.modeling = RNNLayer(input_size=8*self.hidden_size,
                                  hidden_size=self.hidden_size,
