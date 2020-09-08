@@ -9,6 +9,10 @@ import argparse
 TINY = False
 DATA_DIR = 'data'
 
+MODEL_TYPES = [
+    'attentive_reader',
+    'bidaf'
+]
 
 def set_tiny(new_tiny):
     global TINY, DATA_DIR
@@ -126,10 +130,11 @@ def get_train_args(args_to_parse=None):
                         type=int,
                         default=1,
                         help='Number of layers in the bidirectional RNNs.')
-    parser.add_argument('--use_gru',
-                        type=bool,
-                        default=True,
-                        help='True to use GRU / False to use LSTM.')
+    parser.add_argument('--model',
+                        type=str,
+                        default=MODEL_TYPES[0],
+                        choices=MODEL_TYPES,
+                        help='Model type: ' + ' / '.join(MODEL_TYPES))
     parser.add_argument('--metric_name',
                         type=str,
                         default='F1',

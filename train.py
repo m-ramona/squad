@@ -19,7 +19,7 @@ from collections import OrderedDict
 from json import dumps
 
 from attentive_reader import AttentiveReaderModel
-from models import BiDAF
+from bidaf import BiDAF
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 from ujson import load as json_load
@@ -51,11 +51,17 @@ def main(args):
     # model = BiDAF(word_vectors=word_vectors,
     #               hidden_size=args.hidden_size,
     #               drop_prob=args.drop_prob)
-    model = AttentiveReaderModel(word_vectors=word_vectors,
-                  hidden_size=args.hidden_size,
-                  drop_prob=args.drop_prob,
-                  use_gru=args.use_gru,
-                  rnn_layers=args.rnn_layers)
+    if args.model == 'attentive_reader':
+        model = AttentiveReaderModel(word_vectors=word_vectors,
+                                     hidden_size=args.hidden_size,
+                                     drop_prob=args.drop_prob,
+                                     rnn_layers=args.rnn_layers,
+                                     use_gru=True)
+    elif args.model == 'bidaf':
+        model = BiDAF(word_vectors=word_vectors,
+                      hidden_size=args.hidden_size,
+                      drop_prob=args.drop_prob,
+                      use_gru=True)
     model = nn.DataParallel(model, args.gpu_ids)
     if args.load_path:
         log.info(f'Loading checkpoint from {args.load_path}...')
