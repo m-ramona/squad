@@ -166,6 +166,12 @@ class TestBiDAF(TestCase):
         self.assertTrue(torch.allclose(p1.exp().sum(-1), torch.ones((batch,))))
         self.assertTrue(torch.allclose(p2.exp().sum(-1), torch.ones((batch,))))
 
+        model = BiDAF(word_vectors, hidden_size, highway=True)
+        p1, p2 = model(cw_idxs, qw_idxs)
+
+        model = BiDAF(word_vectors, hidden_size, use_gru=False)
+        p1, p2 = model(cw_idxs, qw_idxs)
+
 
 class TestEmbeddingLayer(TestCase):
     def test_forward(self):
