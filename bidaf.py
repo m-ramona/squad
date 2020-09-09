@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from mylayers import AttentionLayer, RNNLayer, AttentionFlowLayer, BiDAFOutputLayer
+from mylayers import AttentionLayer, RNNLayer, AttentionFlowLayer, BiDAFOutputLayer, EmbeddingLayer
 
 
 class BiDAF(nn.Module):
@@ -11,14 +11,20 @@ class BiDAF(nn.Module):
                  context_layers=1,
                  use_gru=True,
                  mod_layers=2,
-                 share_rnn=False):
+                 share_rnn=False,
+                 highway=False):
         super(BiDAF, self).__init__()
 
         self.vocab, self.input_size = word_vectors.size()
         self.hidden_size = hidden_size
-        self.h = 2 * hidden_size
         self.drop_prob = drop_prob
-        self.embed = nn.Embedding.from_pretrained(word_vectors)
+
+        if highway:
+            self.embed = EmbeddingLayer(word_vectors,
+                                        hidden_size,
+                                        drop_prob=drop_prob)
+        else:
+            self.embed = nn.Embedding.from_pretrained(word_vectors)
 
         self.context_rnn = RNNLayer(input_size=self.input_size,
                                     hidden_size=self.hidden_size,

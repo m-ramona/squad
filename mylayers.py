@@ -150,3 +150,42 @@ class BiDAFOutputLayer(nn.Module):
 
         return log_p1, log_p2
 
+
+class HighwayNetwork(nn.Module):
+    def __init__(self, num_layers, hidden_size):
+        super(HighwayNetwork, self).__init__()
+        self.hidden_size = hidden_size
+        self.transforms = nn.ModuleList([nn.Linear(hidden_size, hidden_size)
+                                         for _ in range(num_layers)])
+        self.gates = nn.ModuleList([nn.Linear(hidden_size, hidden_size)
+                                         for _ in range(num_layers)])
+
+    def forward(self, x):
+        for gate, transform in zip(self.gates, self.transforms):
+            g = torch.sigmoid(gate(x))
+            t = F.relu(transform(x))
+            x = g * t + (1 - g) * x
+
+        return x
+
+
+class EmbeddingLayer(nn.Module):
+    def __init__(self, word_vectors, hidden_size, drop_prob=0.):
+        super(EmbeddingLayer, self).__init__()
+        self.drop_prob = drop_prob
+        _, self.input_size = word_vectors.size()
+        self.hidden_size = hidden_size
+
+        self.embed = nn.Embedding.from_pretrained(word_vectors)
+        self.proj = nn.Linear(self.input_size, hidden_size, bias=False)
+        self.highway = HighwayNetwork(2, hidden_size=hidden_size)
+
+    def forward(self, idxs):
+        emb = self.embed(idxs)
+        emb = F.dropout(emb, self.drop_prob, self.training)
+        emb = self.proj(emb)
+        emb = self.highway(emb)
+
+        return emb
+
+

@@ -4,7 +4,7 @@ import torch
 
 from attentive_reader import AttentiveReaderModel
 from bidaf import BiDAF
-from mylayers import AttentionLayer, RNNLayer, AttentionFlowLayer, BiDAFOutputLayer
+from mylayers import AttentionLayer, RNNLayer, AttentionFlowLayer, BiDAFOutputLayer, EmbeddingLayer
 from util import masked_softmax
 
 batch = 3
@@ -165,3 +165,13 @@ class TestBiDAF(TestCase):
         self.assertEqual(p2.size(), (batch, clen))
         self.assertTrue(torch.allclose(p1.exp().sum(-1), torch.ones((batch,))))
         self.assertTrue(torch.allclose(p2.exp().sum(-1), torch.ones((batch,))))
+
+
+class TestEmbeddingLayer(TestCase):
+    def test_forward(self):
+        word_vectors = get_word_vectors(vocab, emb_size)
+        idxs, lengths = get_idxs(batch, clen, vocab)
+
+        layer = EmbeddingLayer(word_vectors, hidden_size)
+        emb = layer(idxs)
+        self.assertEqual(emb.size(), (batch, clen, hidden_size))

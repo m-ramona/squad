@@ -135,6 +135,10 @@ def get_train_args(args_to_parse=None):
                         type=bool,
                         default=True,
                         help='True to use GRU / False to use LSTM.')
+    parser.add_argument('--highway',
+                        type=bool,
+                        default=False,
+                        help='True to highway network after embedding (only BiDAF)')
     parser.add_argument('--share_rnn',
                         type=bool,
                         default=False,
