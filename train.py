@@ -63,7 +63,8 @@ def main(args):
                       hidden_size=args.hidden_size,
                       drop_prob=args.drop_prob,
                       use_gru=args.use_gru,
-                      share_rnn=args.share_rnn)
+                      share_rnn=args.share_rnn,
+                      highway=args.highway)
     elif args.model == 'bidaf_stanford':
         model = BiDAFStanford(word_vectors=word_vectors,
                               hidden_size=args.hidden_size,

@@ -15,7 +15,6 @@ class BiDAF(nn.Module):
                  highway=False):
         super(BiDAF, self).__init__()
 
-        self.vocab, self.input_size = word_vectors.size()
         self.hidden_size = hidden_size
         self.drop_prob = drop_prob
 
@@ -23,8 +22,10 @@ class BiDAF(nn.Module):
             self.embed = EmbeddingLayer(word_vectors,
                                         hidden_size,
                                         drop_prob=drop_prob)
+            self.input_size = hidden_size
         else:
             self.embed = nn.Embedding.from_pretrained(word_vectors)
+            self.input_size = word_vectors.size(1)
 
         self.context_rnn = RNNLayer(input_size=self.input_size,
                                     hidden_size=self.hidden_size,
