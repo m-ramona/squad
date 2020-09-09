@@ -72,8 +72,8 @@ class BiDAF(nn.Module):
         c_emb = F.dropout(c_emb, self.drop_prob, self.training)
         q_emb = F.dropout(q_emb, self.drop_prob, self.training)
 
-        h = self.context_rnn(c_emb, c_len)    # (batch_size, c_len, h)
-        u = self.query_rnn(q_emb, q_len)        # (batch_size, q_len, h)
+        h = self.context_rnn(c_emb, c_len)    # (batch_size, c_len, 2 * hidden_size)
+        u = self.query_rnn(q_emb, q_len)        # (batch_size, q_len, 2 * hidden_size)
 
         g = self.flow(h, u, c_mask, q_mask)
         m = self.modeling(g, c_len)

@@ -76,7 +76,7 @@ class AttentionFlowLayer(nn.Module):
         self.hidden_size = input_size
         self.drop_prob = drop_prob
 
-        self.sim_proj = nn.Linear(3 * input_size, 1, bias=False)
+        self.sim_proj = nn.Linear(3 * input_size, 1, bias=True)
 
     def similarity_matrix(self, h, u):
         # h (batch, h_len, input_size)
