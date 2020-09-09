@@ -6,7 +6,12 @@ from mylayers import AttentionLayer, RNNLayer, AttentionFlowLayer, BiDAFOutputLa
 
 
 class BiDAF(nn.Module):
-    def __init__(self, word_vectors, hidden_size, drop_prob=0., context_layers=1, use_gru=True, mod_layers=2):
+    def __init__(self, word_vectors, hidden_size,
+                 drop_prob=0.,
+                 context_layers=1,
+                 use_gru=True,
+                 mod_layers=2,
+                 share_rnn=False):
         super(BiDAF, self).__init__()
 
         self.vocab, self.input_size = word_vectors.size()
@@ -22,12 +27,15 @@ class BiDAF(nn.Module):
                                     end_of_seq=False,
                                     use_gru=use_gru)
 
-        self.query_rnn = RNNLayer(input_size=self.input_size,
-                                  hidden_size=self.hidden_size,
-                                  num_layers=context_layers,
-                                  drop_prob=drop_prob,
-                                  end_of_seq=False,
-                                  use_gru=use_gru)
+        if share_rnn:
+            self.query_rnn = self.context_rnn
+        else:
+            self.query_rnn = RNNLayer(input_size=self.input_size,
+                                      hidden_size=self.hidden_size,
+                                      num_layers=context_layers,
+                                      drop_prob=drop_prob,
+                                      end_of_seq=False,
+                                      use_gru=use_gru)
 
         self.flow = AttentionFlowLayer(2*self.hidden_size,
                                        drop_prob=drop_prob)

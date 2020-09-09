@@ -135,6 +135,10 @@ def get_train_args(args_to_parse=None):
                         type=bool,
                         default=True,
                         help='True to use GRU / False to use LSTM.')
+    parser.add_argument('--share_rnn',
+                        type=bool,
+                        default=False,
+                        help='True to share RNNs layer between context and query (only BiDAF model)')
     parser.add_argument('--model',
                         type=str,
                         default=MODEL_TYPES[0],
