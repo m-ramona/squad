@@ -101,7 +101,7 @@ class AttentionFlowLayer(nn.Module):
         a_t = masked_softmax(S, u_mask, dim=2)               # (batch, h_len, u_len)
         U_tilde = torch.bmm(a_t, u)                 # (batch, h_len, input_size)
 
-        STANFORD_Q2C = True
+        STANFORD_Q2C = False
         if STANFORD_Q2C:
             # Query-to-context Attention (Stanford variant)
             h_mask = h_mask.view(-1, h_len, 1)
