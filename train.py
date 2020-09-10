@@ -170,7 +170,8 @@ def main(args):
                     results, pred_dict = evaluate(model, dev_loader, device,
                                                   args.dev_eval_file,
                                                   args.max_ans_len,
-                                                  args.use_squad_v2)
+                                                  args.use_squad_v2,
+                                                  args.char_emb)
                     saver.save(step, model, results[args.metric_name], device)
                     ema.resume(model)
 
@@ -190,7 +191,7 @@ def main(args):
                                    num_visuals=args.num_visuals)
 
 
-def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
+def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2, use_char_emb):
     nll_meter = util.AverageMeter()
 
     model.eval()
@@ -203,13 +204,13 @@ def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
             # Setup for forward
             cw_idxs = cw_idxs.to(device)
             qw_idxs = qw_idxs.to(device)
-            if model.use_char_emb:
+            if use_char_emb:
                 cc_idxs = cc_idxs.to(device)
                 qc_idxs = qc_idxs.to(device)
             batch_size = cw_idxs.size(0)
 
             # Forward
-            if model.use_char_emb:
+            if use_char_emb:
                 log_p1, log_p2 = model(cw_idxs, qw_idxs, cc_idxs, qc_idxs)
             else:
                 log_p1, log_p2 = model(cw_idxs, qw_idxs)

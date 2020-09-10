@@ -18,7 +18,6 @@ class BiDAF(nn.Module):
 
         self.hidden_size = hidden_size
         self.drop_prob = drop_prob
-        self.use_char_emb = char_vectors is not None
 
         self.embed = EmbeddingLayer(word_vectors,
                                     hidden_size,
