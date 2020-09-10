@@ -101,17 +101,19 @@ class AttentionFlowLayer(nn.Module):
         a_t = masked_softmax(S, u_mask, dim=2)               # (batch, h_len, u_len)
         U_tilde = torch.bmm(a_t, u)                 # (batch, h_len, input_size)
 
-        # # Query-to-context Attention
-        # b = masked_softmax(masked_max(S, u_mask, dim=2), h_mask, dim=1) # (batch, h_len)
-        # b = b.unsqueeze(dim=1)                      # (batch, 1, h_len)
-        # H_tilde = torch.bmm(b, h)                   # (batch, 1, input_size)
-        # H_tilde = H_tilde.repeat(1, h_len, 1)       # (batch, h_len, input_size)
-
-        # Query-to-context Attention (Stanford variant)
-        h_mask = h_mask.view(-1, h_len, 1)
-        b_t = masked_softmax(S, h_mask, dim=1)      # (batch, h_len, u_len)
-        b_t = torch.bmm(b_t, a_t.transpose(1, 2))   # (batch, h_len, h_len)
-        H_tilde = torch.bmm(b_t, h)                 # (batch, h_len, input_size)
+        STANFORD_Q2C = True
+        if STANFORD_Q2C:
+            # Query-to-context Attention (Stanford variant)
+            h_mask = h_mask.view(-1, h_len, 1)
+            b_t = masked_softmax(S, h_mask, dim=1)      # (batch, h_len, u_len)
+            b_t = torch.bmm(b_t, a_t.transpose(1, 2))   # (batch, h_len, h_len)
+            H_tilde = torch.bmm(b_t, h)                 # (batch, h_len, input_size)
+        else:
+            # Query-to-context Attention (original)
+            b = masked_softmax(masked_max(S, u_mask, dim=2), h_mask, dim=1) # (batch, h_len)
+            b = b.unsqueeze(dim=1)                      # (batch, 1, h_len)
+            H_tilde = torch.bmm(b, h)                   # (batch, 1, input_size)
+            H_tilde = H_tilde.repeat(1, h_len, 1)       # (batch, h_len, input_size)
 
         return H_tilde, U_tilde
 
@@ -169,22 +171,40 @@ class HighwayNetwork(nn.Module):
 
 
 class EmbeddingLayer(nn.Module):
-    def __init__(self, word_vectors, hidden_size, drop_prob=0.):
+    def __init__(self, word_vectors, hidden_size,
+                 char_vectors=None,
+                 drop_prob=0.,
+                 highway=False):
         super(EmbeddingLayer, self).__init__()
         self.drop_prob = drop_prob
-        _, self.input_size = word_vectors.size()
         self.hidden_size = hidden_size
+        self.use_char_emb = char_vectors is not None
+        self.input_size = word_vectors.size(1) + \
+                          (char_vectors.size(1) if self.use_char_emb else 0)
 
-        self.embed = nn.Embedding.from_pretrained(word_vectors)
+        self.w_embed = nn.Embedding.from_pretrained(word_vectors)
+
+        if self.use_char_emb:
+            self.c_embed = nn.Embedding.from_pretrained(char_vectors)
+        else:
+            self.c_embed = None
         self.proj = nn.Linear(self.input_size, hidden_size, bias=False)
-        self.highway = HighwayNetwork(2, hidden_size=hidden_size)
+        if highway:
+            self.highway = HighwayNetwork(2, hidden_size=hidden_size)
+        else:
+            self.highway = lambda x: x
 
-    def forward(self, idxs):
-        emb = self.embed(idxs)
+    def forward(self, w_idxs, c_idxs=None):
+        w_emb = self.w_embed(w_idxs)
+        if self.c_embed:
+            assert (c_idxs is not None)
+            c_emb = self.c_embed(c_idxs)
+            emb = torch.cat((w_emb, c_emb), dim=-1)
+        else:
+            emb = w_emb
         emb = F.dropout(emb, self.drop_prob, self.training)
         emb = self.proj(emb)
         emb = self.highway(emb)
 
         return emb
-
 

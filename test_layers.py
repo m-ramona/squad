@@ -13,6 +13,7 @@ qlen = 5
 input_size = 2
 hidden_size = 3
 emb_size = 4
+c_emb_size = 2
 vocab = 13
 
 
@@ -169,8 +170,16 @@ class TestBiDAF(TestCase):
 class TestEmbeddingLayer(TestCase):
     def test_forward(self):
         word_vectors = get_word_vectors(vocab, emb_size)
-        idxs, lengths = get_idxs(batch, clen, vocab)
+        w_idxs, w_lengths = get_idxs(batch, clen, vocab)
 
-        layer = EmbeddingLayer(word_vectors, hidden_size)
-        emb = layer(idxs)
-        self.assertEqual(emb.size(), (batch, clen, hidden_size))
+        char_vectors = get_word_vectors(vocab, c_emb_size)
+        c_idxs, c_lengths = get_idxs(batch, clen, vocab)
+
+        for highway in [False, True]:
+            layer = EmbeddingLayer(word_vectors, hidden_size, highway=highway)
+            emb = layer(w_idxs)
+            self.assertEqual(emb.size(), (batch, clen, hidden_size))
+
+            layer = EmbeddingLayer(word_vectors, hidden_size, char_vectors=char_vectors, highway=highway)
+            emb = layer(w_idxs, c_idxs)
+            self.assertEqual(emb.size(), (batch, clen, hidden_size))

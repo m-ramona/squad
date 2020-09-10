@@ -7,6 +7,7 @@ from mylayers import AttentionLayer, RNNLayer, AttentionFlowLayer, BiDAFOutputLa
 
 class BiDAF(nn.Module):
     def __init__(self, word_vectors, hidden_size,
+                 char_vectors=None,
                  drop_prob=0.,
                  context_layers=1,
                  use_gru=True,
@@ -18,16 +19,13 @@ class BiDAF(nn.Module):
         self.hidden_size = hidden_size
         self.drop_prob = drop_prob
 
-        if highway:
-            self.embed = EmbeddingLayer(word_vectors,
-                                        hidden_size,
-                                        drop_prob=drop_prob)
-            self.input_size = hidden_size
-        else:
-            self.embed = nn.Embedding.from_pretrained(word_vectors)
-            self.input_size = word_vectors.size(1)
+        self.embed = EmbeddingLayer(word_vectors,
+                                    hidden_size,
+                                    char_vectors=char_vectors,
+                                    drop_prob=drop_prob,
+                                    highway=highway)
 
-        self.context_rnn = RNNLayer(input_size=self.input_size,
+        self.context_rnn = RNNLayer(input_size=self.hidden_size,
                                     hidden_size=self.hidden_size,
                                     num_layers=context_layers,
                                     drop_prob=drop_prob,
@@ -37,7 +35,7 @@ class BiDAF(nn.Module):
         if share_rnn:
             self.query_rnn = self.context_rnn
         else:
-            self.query_rnn = RNNLayer(input_size=self.input_size,
+            self.query_rnn = RNNLayer(input_size=self.hidden_size,
                                       hidden_size=self.hidden_size,
                                       num_layers=context_layers,
                                       drop_prob=drop_prob,
@@ -58,16 +56,16 @@ class BiDAF(nn.Module):
                                        drop_prob=drop_prob,
                                        use_gru=use_gru)
 
-    def forward(self, cw_idxs, qw_idxs):
-        # cw_idxs (batch_size, c_len)
-        # qw_idxs (batch_size, q_len)
+    def forward(self, cw_idxs, qw_idxs, cc_idxs=None, qc_idxs=None):
+        # cw_idxs, cc_idxs (batch_size, c_len)
+        # qw_idxs, qc_idxs (batch_size, q_len)
 
         c_mask = torch.zeros_like(cw_idxs) != cw_idxs
         q_mask = torch.zeros_like(qw_idxs) != qw_idxs
         c_len, q_len = c_mask.sum(-1), q_mask.sum(-1)
 
-        c_emb = self.embed(cw_idxs)         # (batch_size, c_len, input_size)
-        q_emb = self.embed(qw_idxs)         # (batch_size, q_len, input_size)
+        c_emb = self.embed(cw_idxs, cc_idxs)    # (batch_size, c_len, input_size)
+        q_emb = self.embed(qw_idxs, qc_idxs)    # (batch_size, q_len, input_size)
 
         c_emb = F.dropout(c_emb, self.drop_prob, self.training)
         q_emb = F.dropout(q_emb, self.drop_prob, self.training)

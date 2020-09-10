@@ -46,6 +46,10 @@ def main(args):
     # Get embeddings
     log.info('Loading embeddings...')
     word_vectors = util.torch_from_json(args.word_emb_file)
+    if args.char_emb:
+        char_vectors = util.torch_from_json(args.char_emb_file)
+    else:
+        char_vectors = None
 
     # Get model
     log.info('Building model...')
@@ -60,6 +64,7 @@ def main(args):
                                      use_gru=args.use_gru)
     elif args.model == 'bidaf':
         model = BiDAF(word_vectors=word_vectors,
+                      char_vectors=char_vectors,
                       hidden_size=args.hidden_size,
                       drop_prob=args.drop_prob,
                       use_gru=args.use_gru,
@@ -123,11 +128,17 @@ def main(args):
                 # Setup for forward
                 cw_idxs = cw_idxs.to(device)
                 qw_idxs = qw_idxs.to(device)
+                if args.char_emb:
+                    cc_idxs = cc_idxs.to(device)
+                    qc_idxs = qc_idxs.to(device)
                 batch_size = cw_idxs.size(0)
                 optimizer.zero_grad()
 
                 # Forward
-                log_p1, log_p2 = model(cw_idxs, qw_idxs)
+                if args.char_emb:
+                    log_p1, log_p2 = model(cw_idxs, qw_idxs, cc_idxs, qc_idxs)
+                else:
+                    log_p1, log_p2 = model(cw_idxs, qw_idxs)
                 y1, y2 = y1.to(device), y2.to(device)
                 loss = F.nll_loss(log_p1, y1) + F.nll_loss(log_p2, y2)
                 loss_val = loss.item()
