@@ -124,13 +124,6 @@ class TestAttentionFlowLayer(TestCase):
         self.assertEqual(H_tilde.size(), h.size())
         self.assertEqual(U_tilde.size(), h.size())
 
-    def test_G(self):
-        h, u, h_mask, u_mask = self.get_input()
-        layer = AttentionFlowLayer(hidden_size*2)
-        H_tilde, U_tilde = layer.attention_vectors(h, u, h_mask, u_mask)
-        G = layer.G(h, H_tilde, U_tilde)
-        self.assertEqual(G.size(), (batch, clen, hidden_size*8))
-
     def test_forward(self):
         h, u, h_mask, u_mask = self.get_input()
         layer = AttentionFlowLayer(hidden_size*2)

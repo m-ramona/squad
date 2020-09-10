@@ -101,26 +101,25 @@ class AttentionFlowLayer(nn.Module):
         a_t = masked_softmax(S, u_mask, dim=2)               # (batch, h_len, u_len)
         U_tilde = torch.bmm(a_t, u)                 # (batch, h_len, input_size)
 
-        # Query-to-context Attention
-        b = masked_softmax(masked_max(S, u_mask, dim=2), h_mask, dim=1) # (batch, h_len)
-        b = b.unsqueeze(dim=1)                      # (batch, 1, h_len)
-        H_tilde = torch.bmm(b, h)                   # (batch, 1, input_size)
-        H_tilde = H_tilde.repeat(1, h_len, 1)       # (batch, h_len, input_size)
+        # # Query-to-context Attention
+        # b = masked_softmax(masked_max(S, u_mask, dim=2), h_mask, dim=1) # (batch, h_len)
+        # b = b.unsqueeze(dim=1)                      # (batch, 1, h_len)
+        # H_tilde = torch.bmm(b, h)                   # (batch, 1, input_size)
+        # H_tilde = H_tilde.repeat(1, h_len, 1)       # (batch, h_len, input_size)
+
+        # Query-to-context Attention (Stanford variant)
+        h_mask = h_mask.view(-1, h_len, 1)
+        b_t = masked_softmax(S, h_mask, dim=1)      # (batch, h_len, u_len)
+        b_t = torch.bmm(b_t, a_t.transpose(1, 2))   # (batch, h_len, h_len)
+        H_tilde = torch.bmm(b_t, h)                 # (batch, h_len, input_size)
 
         return H_tilde, U_tilde
-
-    def G(self, h, H_tilde, U_tilde):
-        h_dot_ut = torch.mul(h, U_tilde)
-        h_dot_ht = torch.mul(h, H_tilde)
-        G = torch.cat((h, U_tilde, h_dot_ut, h_dot_ht), dim=-1)  # (batch, h_len, 4 * input_size)
-
-        return G
 
     def forward(self, h, u, h_mask, u_mask):
         h = F.dropout(h, self.drop_prob, self.training)  # (bs, c_len, hid_size)
         u = F.dropout(u, self.drop_prob, self.training)  # (bs, q_len, hid_size)
         H_tilde, U_tilde = self.attention_vectors(h, u, h_mask, u_mask)
-        out = self.G(h, H_tilde, U_tilde)           # (batch, h_len, 4 * input_size)
+        out = torch.cat((h, U_tilde, h * U_tilde, h * H_tilde), dim=-1)  # (batch, h_len, 4 * input_size)
 
         return out
 
