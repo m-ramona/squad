@@ -139,6 +139,10 @@ def get_train_args(args_to_parse=None):
                         type=bool,
                         default=False,
                         help='True to highway network after embedding (only BiDAF)')
+    parser.add_argument('--char_emb',
+                        type=bool,
+                        default=False,
+                        help='True to use character embeddings in BiDAF')
     parser.add_argument('--share_rnn',
                         type=bool,
                         default=False,
