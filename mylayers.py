@@ -199,6 +199,7 @@ class EmbeddingLayer(nn.Module):
         if self.c_embed:
             assert (c_idxs is not None)
             c_emb = self.c_embed(c_idxs)
+            c_emb, _ = c_emb.max(dim=-2)
             emb = torch.cat((w_emb, c_emb), dim=-1)
         else:
             emb = w_emb
