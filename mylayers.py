@@ -47,12 +47,11 @@ class RNNLayer(nn.Module):
         x = x[sort_idx]
         x = pack_padded_sequence(x, lengths, batch_first=True)
 
-        if self.use_gru:
-            output, h_n = self.rnn(x)
-        else:
-            output, (h_n, c_n) = self.rnn(x)
+        output, h_n = self.rnn(x)
 
         if self.end_of_seq:
+            if self.use_gru:
+                h_n = h_n[0]
             # h_n (num_layers*2, batch, self.hidden_size)
             h_n = h_n.view(self.num_layers, 2, -1, self.hidden_size)
             # h_n (num_layers, 2, batch, self.hidden_size)
@@ -65,9 +64,10 @@ class RNNLayer(nn.Module):
             # out (batch_size, 1, 2*self.hidden_size)
         else:
             out, _ = pad_packed_sequence(output, batch_first=True, total_length=padded_len)
-            out = F.dropout(out, self.drop_prob, self.training)
             out = out[unsort_idx]
             # out (batch_size, c_len, 2*self.hidden_size)
+
+        out = F.dropout(out, self.drop_prob, self.training)
 
         return out
 

@@ -67,8 +67,8 @@ class BiDAF(nn.Module):
         c_emb = self.embed(cw_idxs, cc_idxs)    # (batch_size, c_len, input_size)
         q_emb = self.embed(qw_idxs, qc_idxs)    # (batch_size, q_len, input_size)
 
-        c_emb = F.dropout(c_emb, self.drop_prob, self.training)
-        q_emb = F.dropout(q_emb, self.drop_prob, self.training)
+        # c_emb = F.dropout(c_emb, self.drop_prob, self.training)
+        # q_emb = F.dropout(q_emb, self.drop_prob, self.training)
 
         h = self.context_rnn(c_emb, c_len)    # (batch_size, c_len, 2 * hidden_size)
         u = self.query_rnn(q_emb, q_len)        # (batch_size, q_len, 2 * hidden_size)
