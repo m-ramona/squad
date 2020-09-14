@@ -33,8 +33,9 @@ class RNNLayer(nn.Module):
         self.num_layers = num_layers
         rnn_init = nn.GRU if use_gru else nn.LSTM
         self.rnn = rnn_init(input_size, hidden_size, num_layers,
-                          dropout=drop_prob if num_layers > 1 else 0,
-                          bidirectional=True)
+                            batch_first=True,
+                            dropout=drop_prob if num_layers > 1 else 0,
+                            bidirectional=True)
         self.end_of_seq = end_of_seq
 
     def forward(self, x, lengths):
