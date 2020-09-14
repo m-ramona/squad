@@ -92,8 +92,8 @@ def main(args):
                                  log=log)
 
     # Get optimizer and scheduler
-    optimizer = optim.Adadelta(model.parameters(), args.lr,
-                               weight_decay=args.l2_wd)
+    optimizer = optim.Adam(model.parameters(), args.lr,
+                           weight_decay=args.l2_wd)
     scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
 
     # Get data loader
@@ -183,12 +183,13 @@ def main(args):
                     log.info('Visualizing in TensorBoard...')
                     for k, v in results.items():
                         tbx.add_scalar(f'dev/{k}', v, step)
-                    util.visualize(tbx,
-                                   pred_dict=pred_dict,
-                                   eval_path=args.dev_eval_file,
-                                   step=step,
-                                   split='dev',
-                                   num_visuals=args.num_visuals)
+                    if args.visualize:
+                        util.visualize(tbx,
+                                       pred_dict=pred_dict,
+                                       eval_path=args.dev_eval_file,
+                                       step=step,
+                                       split='dev',
+                                       num_visuals=args.num_visuals)
 
 
 def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2, use_char_emb):

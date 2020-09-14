@@ -113,7 +113,7 @@ def get_train_args(args_to_parse=None):
                         help='Number of steps between successive evaluations.')
     parser.add_argument('--lr',
                         type=float,
-                        default=0.5,
+                        default=1e-3,
                         help='Learning rate.')
     parser.add_argument('--l2_wd',
                         type=float,
@@ -121,7 +121,7 @@ def get_train_args(args_to_parse=None):
                         help='L2 weight decay.')
     parser.add_argument('--num_epochs',
                         type=int,
-                        default=30,
+                        default=40,
                         help='Number of epochs for which to train. Negative means forever.')
     parser.add_argument('--drop_prob',
                         type=float,
@@ -173,6 +173,10 @@ def get_train_args(args_to_parse=None):
                         type=float,
                         default=0.999,
                         help='Decay rate for exponential moving average of parameters.')
+    parser.add_argument('--visualize',
+                        type=bool,
+                        default=False,
+                        help='True to visualize text output into Tensorflow.')
 
     args = parser.parse_args(args_to_parse)
 
