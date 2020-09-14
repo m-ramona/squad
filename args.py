@@ -159,7 +159,7 @@ def get_train_args(args_to_parse=None):
                         help='Name of dev metric to determine best checkpoint.')
     parser.add_argument('--max_checkpoints',
                         type=int,
-                        default=5,
+                        default=1,
                         help='Maximum number of checkpoints to keep on disk.')
     parser.add_argument('--max_grad_norm',
                         type=float,
@@ -173,10 +173,6 @@ def get_train_args(args_to_parse=None):
                         type=float,
                         default=0.999,
                         help='Decay rate for exponential moving average of parameters.')
-    parser.add_argument('--visualize',
-                        type=bool,
-                        default=False,
-                        help='True to visualize text output into Tensorflow.')
 
     args = parser.parse_args(args_to_parse)
 

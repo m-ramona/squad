@@ -183,13 +183,12 @@ def main(args):
                     log.info('Visualizing in TensorBoard...')
                     for k, v in results.items():
                         tbx.add_scalar(f'dev/{k}', v, step)
-                    if args.visualize:
-                        util.visualize(tbx,
-                                       pred_dict=pred_dict,
-                                       eval_path=args.dev_eval_file,
-                                       step=step,
-                                       split='dev',
-                                       num_visuals=args.num_visuals)
+                    util.visualize(tbx,
+                                   pred_dict=pred_dict,
+                                   eval_path=args.dev_eval_file,
+                                   step=step,
+                                   split='dev',
+                                   num_visuals=args.num_visuals)
 
 
 def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2, use_char_emb):
