@@ -137,19 +137,19 @@ def get_train_args(args_to_parse=None):
                         help='True to use GRU / False to use LSTM.')
     parser.add_argument('--highway',
                         type=bool,
-                        default=False,
+                        default=True,
                         help='True to highway network after embedding (only BiDAF)')
     parser.add_argument('--char_emb',
                         type=bool,
-                        default=False,
+                        default=True,
                         help='True to use character embeddings in BiDAF')
     parser.add_argument('--share_rnn',
                         type=bool,
-                        default=False,
+                        default=True,
                         help='True to share RNNs layer between context and query (only BiDAF model)')
     parser.add_argument('--model',
                         type=str,
-                        default=MODEL_TYPES[0],
+                        default=MODEL_TYPES[1],
                         choices=MODEL_TYPES,
                         help='Model type: ' + ' / '.join(MODEL_TYPES))
     parser.add_argument('--metric_name',
