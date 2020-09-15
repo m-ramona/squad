@@ -119,6 +119,11 @@ def get_train_args(args_to_parse=None):
                         type=float,
                         default=0,
                         help='L2 weight decay.')
+    parser.add_argument('--lr_sched',
+                        type=str,
+                        default='const',
+                        choices=['const', 'plateau'],
+                        help='Learning rate scheduling method.')
     parser.add_argument('--num_epochs',
                         type=int,
                         default=40,

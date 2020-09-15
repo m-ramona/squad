@@ -94,7 +94,10 @@ def main(args):
     # Get optimizer and scheduler
     optimizer = optim.Adam(model.parameters(), args.lr,
                            weight_decay=args.l2_wd)
-    scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
+    if args.lr_sched == 'plateau':
+        scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
+    else: # if args.lr_sched == 'const':
+        scheduler = sched.ReduceLROnPlateau(optimizer)  # Constant LR
 
     # Get data loader
     log.info('Building dataset...')
