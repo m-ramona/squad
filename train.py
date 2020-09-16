@@ -69,7 +69,8 @@ def main(args):
                       drop_prob=args.drop_prob,
                       use_gru=args.use_gru,
                       share_rnn=args.share_rnn,
-                      highway=args.highway)
+                      highway=args.highway,
+                      share_proj=args.share_proj)
     elif args.model == 'bidaf_stanford':
         model = BiDAFStanford(word_vectors=word_vectors,
                               hidden_size=args.hidden_size,
@@ -92,8 +93,16 @@ def main(args):
                                  log=log)
 
     # Get optimizer and scheduler
-    optimizer = optim.Adam(model.parameters(), args.lr,
-                           weight_decay=args.l2_wd)
+    if args.optim == 'adam':
+        optimizer = optim.Adam(model.parameters(), args.lr,
+                               weight_decay=args.l2_wd)
+    elif args.optim == 'adamw':
+        optimizer = optim.AdamW(model.parameters(), args.lr,
+                                weight_decay=args.l2_wd)
+    elif args.optim == 'adadelta':
+        optimizer = optim.Adadelta(model.parameters(), args.lr,
+                                   weight_decay=args.l2_wd)
+
     if args.lr_sched == 'plateau':
         scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
     else: # if args.lr_sched == 'const':

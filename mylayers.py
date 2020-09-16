@@ -127,14 +127,17 @@ class AttentionFlowLayer(nn.Module):
         return out
 
 class BiDAFOutputLayer(nn.Module):
-    def __init__(self, hidden_size, drop_prob=0., use_gru=True):
+    def __init__(self, hidden_size, drop_prob=0., use_gru=True, share_proj=False):
         super(BiDAFOutputLayer, self).__init__()
         self.hidden_size = hidden_size
         self.p1_proj = nn.Linear(10*hidden_size, 1)
         self.rnn_p2 = RNNLayer(2*hidden_size, hidden_size,
                                num_layers=1, drop_prob=drop_prob,
                                end_of_seq=False, use_gru=use_gru)
-        self.p2_proj = nn.Linear(10*hidden_size, 1)
+        if share_proj:
+            self.p2_proj = self.p1_proj
+        else:
+            self.p2_proj = nn.Linear(10*hidden_size, 1)
 
     def forward(self, g, m, masks):
         lengths = masks.sum(-1)

@@ -13,7 +13,8 @@ class BiDAF(nn.Module):
                  use_gru=True,
                  mod_layers=2,
                  share_rnn=False,
-                 highway=False):
+                 highway=False,
+                 share_proj=False):
         super(BiDAF, self).__init__()
 
         self.hidden_size = hidden_size
@@ -54,7 +55,8 @@ class BiDAF(nn.Module):
 
         self.output = BiDAFOutputLayer(self.hidden_size,
                                        drop_prob=drop_prob,
-                                       use_gru=use_gru)
+                                       use_gru=use_gru,
+                                       share_proj=share_proj)
 
     def forward(self, cw_idxs, qw_idxs, cc_idxs=None, qc_idxs=None):
         # cw_idxs, cc_idxs (batch_size, c_len)

@@ -115,10 +115,11 @@ def get_train_args(args_to_parse=None):
                         type=float,
                         default=1e-3,
                         help='Learning rate.')
-    parser.add_argument('--l2_wd',
-                        type=float,
-                        default=0,
-                        help='L2 weight decay.')
+    parser.add_argument('--optim',
+                        type=str,
+                        default='adam',
+                        choices=['adam', 'adamw', 'adadelta'],
+                        help='Optimizer.')
     parser.add_argument('--lr_sched',
                         type=str,
                         default='const',
@@ -152,6 +153,10 @@ def get_train_args(args_to_parse=None):
                         type=bool,
                         default=True,
                         help='True to share RNNs layer between context and query (only BiDAF model)')
+    parser.add_argument('--share_proj',
+                        type=bool,
+                        default=False,
+                        help='True to share BiDAF start and end output projection layers')
     parser.add_argument('--model',
                         type=str,
                         default=MODEL_TYPES[1],
